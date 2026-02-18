@@ -68,8 +68,6 @@
           "rgba(255, 165, 0, 1)", // orange
           "rgba(255, 0, 0, 1)" // red (very hot)
         ];
-
-        maxIntensity: 200,
         
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
@@ -81,6 +79,7 @@
               })),
             gradient: strongGradient,
             radius: 35,
+            maxIntensity: 200,
             map: null,
           });
         });
@@ -164,6 +163,7 @@
 
   </body>
 </html>
+
 
 
 
