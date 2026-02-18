@@ -57,15 +57,14 @@
         const sheetData = await loadSheetData();
         const geocoded = await geocodePostcodes(sheetData);
 
-        // Create heatmap layers for each issue
-        
+        // Create heatmap layers for each issue – back to the simple, original version
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
-              .filter(row => Number(row[issue.key]) >= 1)
+              .filter(row => row[issue.key] === "1")
               .map(row => new google.maps.LatLng(row.lat, row.lng)),
             radius: 20,
-            map: null,
+            map: null
           });
         });
 
@@ -148,21 +147,3 @@
 
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
