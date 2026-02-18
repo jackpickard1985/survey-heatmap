@@ -62,7 +62,10 @@
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
               .filter(row => row[issue.key] === "1")
-              .map(row => new google.maps.LatLng(row.lat, row.lng)),
+              .map(row => ({
+                location: new google.maps.LatLng(row.lat, row.lng),
+                weight: Number(row[issue.key]) // ⭐ THIS MAKES SEVERITY WORK
+              }))
             map: null,
             radius: 25
           });
@@ -115,7 +118,14 @@
           if (!row.postcode) continue;
 
           try {
-            const geo = await geocoder.geocode({ address: row.postcode?.trim() + ", UK" });
+            const cleanedPostcode = String(row.postcode || "")
+              .replace(/\s+/g, " ")
+              .trim()
+              .toUpperCase();
+
+            const geo = await geocoder.geocode({
+              address: cleanedPostcode + ", London, UK"
+            });
             if (geo.results.length > 0) {
               const loc = geo.results[0].geometry.location;
               results.push({
@@ -140,6 +150,7 @@
 
   </body>
 </html>
+
 
 
 
