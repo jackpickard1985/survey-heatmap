@@ -64,7 +64,7 @@
               .filter(row => Number(row[issue.key]) >= 3) // accept 1–4
               .map(row => ({
                 location: new google.maps.LatLng(row.lat, row.lng),
-                weight: Number(row[issue.key]) * 100
+                weight: Number(row[issue.key]) * 200
               })),
             map: null,
             radius: 25
@@ -150,6 +150,7 @@
 
   </body>
 </html>
+
 
 
 
