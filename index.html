@@ -64,7 +64,6 @@
             data: geocoded
               .filter(row => Number(row[issue.key]) >= 1)
               .map(row => new google.maps.LatLng(row.lat, row.lng)),
-            gradient: strongGradient,
             radius: 20,
             map: null,
           });
@@ -149,6 +148,7 @@
 
   </body>
 </html>
+
 
 
 
