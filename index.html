@@ -76,4 +76,67 @@
         const select = document.getElementById("issueSelect");
         issues.forEach(issue => {
           const opt = document.createElement("option");
-          opt.value
+          opt.value = issue.key;
+          opt.textContent = issue.label;
+          select.appendChild(opt);
+        });
+      }
+
+      function changeLayer() {
+        const selected = document.getElementById("issueSelect").value;
+
+        // Hide all layers
+        Object.values(heatmaps).forEach(layer => layer.setMap(null));
+
+        // Show selected layer
+        if (heatmaps[selected]) {
+          heatmaps[selected].setMap(map);
+        }
+      }
+
+      async function loadSheetData() {
+        return new Promise(resolve => {
+          Papa.parse(
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0xXXXXX/pub?gid=0&single=true&output=csv",
+            {
+              download: true,
+              header: true,
+              complete: results => resolve(results.data)
+            }
+          );
+        });
+      }
+
+      async function geocodePostcodes(rows) {
+        const geocoder = new google.maps.Geocoder();
+        const results = [];
+
+        for (const row of rows) {
+          if (!row.postcode) continue;
+
+          try {
+            const geo = await geocoder.geocode({ address: row.postcode + ", UK" });
+            if (geo.results.length > 0) {
+              const loc = geo.results[0].geometry.location;
+              results.push({
+                ...row,
+                lat: loc.lat(),
+                lng: loc.lng()
+              });
+            }
+          } catch (e) {
+            console.warn("Failed to geocode:", row.postcode);
+          }
+        }
+
+        return results;
+      }
+    </script>
+
+    <!-- Google Maps API -->
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization&callback=initMap">
+    </script>
+
+  </body>
+</html>
