@@ -58,28 +58,14 @@
         const geocoded = await geocodePostcodes(sheetData);
 
         // Create heatmap layers for each issue
-
-        const strongGradient = [
-          "rgba(0, 0, 255, 0)", // transparent blue
-          "rgba(0, 0, 255, 1)", // blue
-          "rgba(0, 255, 255, 1)", // cyan
-          "rgba(0, 255, 0, 1)", // green
-          "rgba(255, 255, 0, 1)", // yellow
-          "rgba(255, 165, 0, 1)", // orange
-          "rgba(255, 0, 0, 1)" // red (very hot)
-        ];
         
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
               .filter(row => Number(row[issue.key]) >= 1)
-              .map(row => ({
-                location: new google.maps.LatLng(row.lat, row.lng),
-                weight: Number(row[issue.key]) * 10
-              })),
+              .map(row => new google.maps.LatLng(row.lat, row.lng)),
             gradient: strongGradient,
-            radius: 35,
-            maxIntensity: 200,
+            radius: 20,
             map: null,
           });
         });
@@ -163,6 +149,7 @@
 
   </body>
 </html>
+
 
 
 
