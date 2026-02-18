@@ -112,6 +112,12 @@
         const results = [];
 
         for (const row of rows) {
+
+          // 🔍 DEBUGGING — SEE WHAT THE CODE IS ACTUALLY READING
+          console.log("Row object:", row);
+          console.log("Raw postcode value:", JSON.stringify(row.postcode));
+          console.log("Issue value (Drug use):", JSON.stringify(row["Drug use"]));
+          
           if (!row.postcode) continue;
 
           try {
@@ -140,6 +146,7 @@
 
   </body>
 </html>
+
 
 
 
