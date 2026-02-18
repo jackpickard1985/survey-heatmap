@@ -61,7 +61,7 @@
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
-              .filter(row => Number(row[issue.key]) >= 1) // accept 1–4
+              .filter(row => Number(row[issue.key]) >= 2) // accept 1–4
               .map(row => ({
                 location: new google.maps.LatLng(row.lat, row.lng),
                 weight: Number(row[issue.key]) * 20
@@ -150,4 +150,5 @@
 
   </body>
 </html>
+
 
