@@ -48,7 +48,7 @@
       let map;
       let heatmaps = {};
 
-      const issues = [
+      let issues = [
         { key: "Dirty streets", label: "Dirty streets" },
         { key: "Drug use", label: "Drug use" },
         { key: "Council property upkeep", label: "Council property upkeep" },
@@ -69,35 +69,28 @@
         const sheetData = await loadSheetData();
         const geocoded = await geocodePostcodes(sheetData);
 
-        // Smooth, modern gradient
         const softGradient = [
-          "rgba(0,0,0,0)",
-          "rgba(0, 120, 255, 0.4)",
-          "rgba(0, 200, 255, 0.6)",
-          "rgba(0, 255, 180, 0.7)",
-          "rgba(255, 255, 0, 0.8)",
-          "rgba(255, 140, 0, 0.9)",
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 128, 255, 0.6)",
+          "rgba(0, 255, 255, 0.7)",
+          "rgba(0, 255, 0, 0.8)",
+          "rgba(255, 255, 0, 0.9)",
+          "rgba(255, 128, 0, 1)",
           "rgba(255, 0, 0, 1)"
         ];
 
-        // Create heatmap layers
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
-            data: geocoded.map(row => ({
-              location: new google.maps.LatLng(row.lat, row.lng),
-              weight: Math.pow(Number(row[issue.key] || 0), 2) // improved weighting
-            })),
+            data: geocoded
+              .filter(row => Number(row[issue.key]) >= 2)
+              .map(row => ({
+                location: new google.maps.LatLng(row.lat, row.lng),
+                weight: Number(row[issue.key]) * 200
+              })),
             gradient: softGradient,
-            radius: 120, // tighter default radius
+            radius: 120,
             map: null
           });
-        });
-
-        // Adaptive radius on zoom
-        google.maps.event.addListener(map, "zoom_changed", () => {
-          const z = map.getZoom();
-          const newRadius = Math.max(10, 150 - z * 10);
-          Object.values(heatmaps).forEach(h => h.set("radius", newRadius));
         });
 
         document.getElementById("loading").style.display = "none";
@@ -133,7 +126,7 @@
         });
       }
 
-      // Parallel geocoding with concurrency limit
+      // Parallel geocoding only
       async function geocodePostcodes(rows) {
         const geocoder = new google.maps.Geocoder();
         const results = [];
@@ -177,4 +170,3 @@
 
   </body>
 </html>
-
