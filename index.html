@@ -115,7 +115,7 @@
           if (!row.postcode) continue;
 
           try {
-            const geo = await geocoder.geocode({ address: row.postcode + ", UK" });
+            const geo = await geocoder.geocode({ address: row.postcode?.trim() + ", UK" });
             if (geo.results.length > 0) {
               const loc = geo.results[0].geometry.location;
               results.push({
@@ -140,6 +140,7 @@
 
   </body>
 </html>
+
 
 
 
