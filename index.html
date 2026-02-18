@@ -3,7 +3,7 @@
   <head>
     <title>Postcode Heatmap from Google Sheets CSV</title>
 
-    <!-- Papaparse for correct CSV parsing -->
+    <!-- Papaparse for CSV parsing -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <style>
@@ -55,11 +55,25 @@
         populateDropdown();
 
         const sheetData = await loadSheetData();
-        console.log("Sheet data:", sheetData);
-
         const geocoded = await geocodePostcodes(sheetData);
-        console.log("Geocoded:", geocoded);
 
         // Create heatmap layers for each issue
         issues.forEach(issue => {
-          heatmaps[issue.key] =
+          heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
+            data: geocoded
+              .filter(row => row[issue.key] === "1")
+              .map(row => new google.maps.LatLng(row.lat, row.lng)),
+            map: null,
+            radius: 25
+          });
+        });
+
+        // Show the first issue by default
+        changeLayer();
+      }
+
+      function populateDropdown() {
+        const select = document.getElementById("issueSelect");
+        issues.forEach(issue => {
+          const opt = document.createElement("option");
+          opt.value
