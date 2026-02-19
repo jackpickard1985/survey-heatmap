@@ -48,7 +48,7 @@
       let map;
       let heatmaps = {};
 
-      let issues = [
+      const issues = [
         { key: "Dirty streets", label: "Dirty streets" },
         { key: "Drug use", label: "Drug use" },
         { key: "Council property upkeep", label: "Council property upkeep" },
@@ -57,6 +57,13 @@
         { key: "Universal credit", label: "Universal credit" },
         { key: "Access to healthcare", label: "Access to healthcare" }
       ];
+
+      // Convert metres → pixels at current zoom
+      function metresToPixels(metres, lat, zoom) {
+        const metresPerPixel =
+          156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+        return metres / metresPerPixel;
+      }
 
       async function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
@@ -79,6 +86,7 @@
           "rgba(255, 0, 0, 1)"
         ];
 
+        // Create heatmap layers
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
@@ -88,9 +96,32 @@
                 weight: Number(row[issue.key]) * 200
               })),
             gradient: softGradient,
-            radius: 120,
+            radius: 120, // initial radius (will be overridden)
             map: null
           });
+        });
+
+        // Apply 100m max radius on zoom
+        google.maps.event.addListener(map, "zoom_changed", () => {
+          const zoom = map.getZoom();
+          const lat = map.getCenter().lat();
+
+          const radiusPixels = metresToPixels(100, lat, zoom);
+
+          Object.values(heatmaps).forEach(h =>
+            h.set("radius", radiusPixels)
+          );
+        });
+
+        // Apply radius once at startup too
+        google.maps.event.addListenerOnce(map, "idle", () => {
+          const zoom = map.getZoom();
+          const lat = map.getCenter().lat();
+          const radiusPixels = metresToPixels(100, lat, zoom);
+
+          Object.values(heatmaps).forEach(h =>
+            h.set("radius", radiusPixels)
+          );
         });
 
         document.getElementById("loading").style.display = "none";
@@ -126,7 +157,7 @@
         });
       }
 
-      // Parallel geocoding only
+      // Parallel geocoding
       async function geocodePostcodes(rows) {
         const geocoder = new google.maps.Geocoder();
         const results = [];
