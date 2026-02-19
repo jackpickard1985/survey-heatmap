@@ -40,6 +40,8 @@
         border-radius: 6px;
         z-index: 999;
         font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        border: 1px solid #ccc;
       }
       #legend .box {
         display: inline-block;
@@ -47,16 +49,28 @@
         height: 12px;
         margin-right: 6px;
       }
+
+      /* Improved stats box */
       #stats {
         position: absolute;
         bottom: 20px;
         right: 10px;
         background: white;
-        padding: 10px;
-        border-radius: 6px;
+        padding: 15px 18px;
+        border-radius: 8px;
         z-index: 999;
-        font-size: 14px;
-        max-width: 200px;
+        font-size: 15px;
+        max-width: 260px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        border: 1px solid #ccc;
+      }
+      #stats strong {
+        font-size: 16px;
+        display: block;
+        margin-bottom: 6px;
+      }
+      #stats hr {
+        margin: 8px 0;
       }
     </style>
   </head>
@@ -195,13 +209,27 @@
         const data = heatmaps[issueKey].getData();
 
         const scores = data.map(p => p.weight / 20);
+
         const count = scores.length;
         const avg = count ? (scores.reduce((a,b)=>a+b,0) / count).toFixed(2) : "N/A";
 
+        const min = count ? Math.min(...scores) : "N/A";
+        const max = count ? Math.max(...scores) : "N/A";
+
+        const count4 = scores.filter(s => s === 4).length;
+        const count3 = scores.filter(s => s === 3).length;
+        const count2 = scores.filter(s => s === 2).length;
+
         statsDiv.innerHTML = `
-          <strong>${issueKey}</strong><br>
-          Postcodes rated 2–4: ${count}<br>
-          Average score: ${avg}
+          <strong>${issueKey}</strong>
+          <div><b>Total postcodes rated 2–4:</b> ${count}</div>
+          <div><b>Average score:</b> ${avg}</div>
+          <div><b>Min score:</b> ${min}</div>
+          <div><b>Max score:</b> ${max}</div>
+          <hr>
+          <div><b>Score 4 (high):</b> ${count4}</div>
+          <div><b>Score 3 (moderate):</b> ${count3}</div>
+          <div><b>Score 2 (low):</b> ${count2}</div>
         `;
       }
 
