@@ -106,7 +106,7 @@
           const zoom = map.getZoom();
           const lat = map.getCenter().lat();
 
-          const radiusPixels = metresToPixels(250, lat, zoom);
+          const radiusPixels = metresToPixels(1000, lat, zoom);
 
           Object.values(heatmaps).forEach(h =>
             h.set("radius", radiusPixels)
@@ -201,4 +201,5 @@
 
   </body>
 </html>
+
 
