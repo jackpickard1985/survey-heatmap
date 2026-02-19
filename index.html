@@ -31,6 +31,33 @@
         font-size: 18px;
         z-index: 2000;
       }
+      #legend {
+        position: absolute;
+        bottom: 20px;
+        left: 10px;
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        z-index: 999;
+        font-size: 14px;
+      }
+      #legend .box {
+        display: inline-block;
+        width: 20px;
+        height: 12px;
+        margin-right: 6px;
+      }
+      #stats {
+        position: absolute;
+        bottom: 20px;
+        right: 10px;
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        z-index: 999;
+        font-size: 14px;
+        max-width: 200px;
+      }
     </style>
   </head>
 
@@ -40,13 +67,30 @@
     <div id="controls">
       <label>Select issue:</label>
       <select id="issueSelect" onchange="changeLayer()"></select>
+
+      <br><br>
+
+      <label>
+        <input type="checkbox" id="togglePoints" onchange="togglePointsMode()">
+        Show points instead of heatmap
+      </label>
     </div>
+
+    <div id="legend">
+      <strong>Heatmap intensity</strong><br>
+      <div><span class="box" style="background: rgba(0,128,255,0.6)"></span> Low</div>
+      <div><span class="box" style="background: rgba(0,255,0,0.8)"></span> Medium</div>
+      <div><span class="box" style="background: rgba(255,0,0,1)"></span> High</div>
+    </div>
+
+    <div id="stats"></div>
 
     <div id="map"></div>
 
     <script>
       let map;
       let heatmaps = {};
+      let markers = [];
 
       const issues = [
         { key: "Dirty streets", label: "Dirty streets" },
@@ -109,8 +153,56 @@
 
       function changeLayer() {
         const selected = document.getElementById("issueSelect").value;
+        const showPoints = document.getElementById("togglePoints").checked;
+
         Object.values(heatmaps).forEach(layer => layer.setMap(null));
-        if (heatmaps[selected]) heatmaps[selected].setMap(map);
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+
+        if (showPoints) {
+          togglePointsMode();
+        } else {
+          heatmaps[selected].setMap(map);
+        }
+
+        updateStats(selected);
+      }
+
+      function togglePointsMode() {
+        const showPoints = document.getElementById("togglePoints").checked;
+        const selected = document.getElementById("issueSelect").value;
+
+        Object.values(heatmaps).forEach(h => h.setMap(null));
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+
+        if (showPoints) {
+          const data = heatmaps[selected].getData();
+          data.forEach(item => {
+            const marker = new google.maps.Marker({
+              position: item.location,
+              map: map
+            });
+            markers.push(marker);
+          });
+        } else {
+          heatmaps[selected].setMap(map);
+        }
+      }
+
+      function updateStats(issueKey) {
+        const statsDiv = document.getElementById("stats");
+        const data = heatmaps[issueKey].getData();
+
+        const scores = data.map(p => p.weight / 20);
+        const count = scores.length;
+        const avg = count ? (scores.reduce((a,b)=>a+b,0) / count).toFixed(2) : "N/A";
+
+        statsDiv.innerHTML = `
+          <strong>${issueKey}</strong><br>
+          Postcodes rated 2–4: ${count}<br>
+          Average score: ${avg}
+        `;
       }
 
       async function loadSheetData() {
@@ -170,11 +262,3 @@
 
   </body>
 </html>
-
-
-
-
-
-
-
-
