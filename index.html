@@ -3,24 +3,69 @@
   <head>
     <title>Postcode Heatmap</title>
 
-    <!-- Papaparse for CSV parsing -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <style>
-      #map {
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
         height: 100vh;
-        width: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+
+      /* ⭐ Left sidebar */
+      #sidebar {
+        width: 280px;
+        background: #ffffff;
+        border-right: 1px solid #ccc;
+        padding: 15px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      #map {
+        flex: 1;
       }
 
       #controls {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: white;
+        background: #f7f7f7;
         padding: 10px;
-        z-index: 999;
         border-radius: 6px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+
+      #legend {
+        background: #f7f7f7;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+
+      #legend .box {
+        display: inline-block;
+        width: 20px;
+        height: 12px;
+        margin-right: 6px;
+      }
+
+      /* ⭐ Stats panel now lives INSIDE the sidebar */
+      #statsPanel {
+        margin-top: 20px;
+        background: #f7f7f7;
+        padding: 12px;
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+
+      #statsPanel strong {
+        font-size: 17px;
+        display: block;
+        margin-bottom: 8px;
       }
 
       #loading {
@@ -34,80 +79,40 @@
         font-size: 18px;
         z-index: 2000;
       }
-
-      #legend {
-        position: absolute;
-        bottom: 20px;
-        left: 10px;
-        background: white;
-        padding: 10px;
-        border-radius: 6px;
-        z-index: 999;
-        font-size: 14px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        border: 1px solid #ccc;
-      }
-
-      #legend .box {
-        display: inline-block;
-        width: 20px;
-        height: 12px;
-        margin-right: 6px;
-      }
-
-      /* ⭐ New floating stats panel */
-      #statsPanel {
-        position: absolute;
-        top: 120px;
-        left: 10px;
-        width: 260px;
-        background: white;
-        padding: 15px 18px;
-        border-radius: 8px;
-        z-index: 999;
-        font-size: 15px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-        border: 1px solid #ccc;
-      }
-
-      #statsPanel strong {
-        font-size: 17px;
-        display: block;
-        margin-bottom: 8px;
-      }
-
-      #statsPanel hr {
-        margin: 10px 0;
-      }
     </style>
   </head>
 
   <body>
-    <div id="loading">Loading map data…</div>
 
-    <div id="controls">
-      <label>Select issue:</label>
-      <select id="issueSelect" onchange="changeLayer()"></select>
+    <!-- ⭐ New left sidebar -->
+    <div id="sidebar">
 
-      <br><br>
+      <div id="controls">
+        <label>Select issue:</label>
+        <select id="issueSelect" onchange="changeLayer()"></select>
 
-      <label>
-        <input type="checkbox" id="togglePoints" onchange="togglePointsMode()">
-        Show points instead of heatmap
-      </label>
+        <br><br>
+
+        <label>
+          <input type="checkbox" id="togglePoints" onchange="togglePointsMode()">
+          Show points instead of heatmap
+        </label>
+      </div>
+
+      <div id="legend">
+        <strong>Heatmap intensity</strong><br>
+        <div><span class="box" style="background: rgba(0,128,255,0.6)"></span> Low</div>
+        <div><span class="box" style="background: rgba(0,255,0,0.8)"></span> Medium</div>
+        <div><span class="box" style="background: rgba(255,0,0,1)"></span> High</div>
+      </div>
+
+      <div id="statsPanel"></div>
+
     </div>
-
-    <div id="legend">
-      <strong>Heatmap intensity</strong><br>
-      <div><span class="box" style="background: rgba(0,128,255,0.6)"></span> Low</div>
-      <div><span class="box" style="background: rgba(0,255,0,0.8)"></span> Medium</div>
-      <div><span class="box" style="background: rgba(255,0,0,1)"></span> High</div>
-    </div>
-
-    <!-- ⭐ New floating stats panel -->
-    <div id="statsPanel"></div>
 
     <div id="map"></div>
+
+    <div id="loading">Loading map data…</div>
 
     <script>
       let map;
@@ -212,7 +217,6 @@
         }
       }
 
-      /* ⭐ Updated stats function for the floating panel */
       function updateStats(issueKey) {
         const panel = document.getElementById("statsPanel");
         const data = heatmaps[issueKey].getData();
@@ -255,7 +259,6 @@
         });
       }
 
-      // Parallel geocoding
       async function geocodePostcodes(rows) {
         const geocoder = new google.maps.Geocoder();
         const results = [];
