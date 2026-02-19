@@ -158,7 +158,7 @@
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
-              .filter(row => Number(row[issue.key]) >= 2)
+              .filter(row => Number(row[issue.key]) >= 1) // ⭐ include 1s
               .map(row => ({
                 location: new google.maps.LatLng(row.lat, row.lng),
                 weight: Number(row[issue.key]) * 20
@@ -222,35 +222,30 @@
         }
       }
 
-      /* ⭐ Corrected stats function */
+      /* ⭐ Updated stats function: includes 1s, removes min/max */
       function updateStats(issueKey) {
         const panel = document.getElementById("statsPanel");
 
-        // Convert MVCArray → normal array
         const data = heatmaps[issueKey].getData().getArray();
-
         const scores = data.map(p => p.weight / 20);
 
         const count = scores.length;
         const avg = count ? (scores.reduce((a,b)=>a+b,0) / count).toFixed(2) : "N/A";
 
-        const min = count ? Math.min(...scores) : "N/A";
-        const max = count ? Math.max(...scores) : "N/A";
-
         const count4 = scores.filter(s => s === 4).length;
         const count3 = scores.filter(s => s === 3).length;
         const count2 = scores.filter(s => s === 2).length;
+        const count1 = scores.filter(s => s === 1).length;
 
         panel.innerHTML = `
           <strong>${issueKey}</strong>
-          <div><b>Total postcodes rated 2–4:</b> ${count}</div>
+          <div><b>Total postcodes rated 1–4:</b> ${count}</div>
           <div><b>Average score:</b> ${avg}</div>
-          <div><b>Min score:</b> ${min}</div>
-          <div><b>Max score:</b> ${max}</div>
           <hr>
           <div><b>Score 4 (high):</b> ${count4}</div>
           <div><b>Score 3 (moderate):</b> ${count3}</div>
           <div><b>Score 2 (low):</b> ${count2}</div>
+          <div><b>Score 1 (very low):</b> ${count1}</div>
         `;
       }
 
