@@ -58,13 +58,6 @@
         { key: "Access to healthcare", label: "Access to healthcare" }
       ];
 
-      // Convert metres → pixels at current zoom
-      function metresToPixels(metres, lat, zoom) {
-        const metresPerPixel =
-          156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
-        return metres / metresPerPixel;
-      }
-
       async function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
           zoom: 10,
@@ -86,7 +79,6 @@
           "rgba(255, 0, 0, 1)"
         ];
 
-        // Create heatmap layers
         issues.forEach(issue => {
           heatmaps[issue.key] = new google.maps.visualization.HeatmapLayer({
             data: geocoded
@@ -96,32 +88,9 @@
                 weight: Number(row[issue.key]) * 200
               })),
             gradient: softGradient,
-            radius: 120, // initial radius (will be overridden)
+            radius: 120,
             map: null
           });
-        });
-
-        // Apply 100m max radius on zoom
-        google.maps.event.addListener(map, "zoom_changed", () => {
-          const zoom = map.getZoom();
-          const lat = map.getCenter().lat();
-
-          const radiusPixels = metresToPixels(1000, lat, zoom);
-
-          Object.values(heatmaps).forEach(h =>
-            h.set("radius", radiusPixels)
-          );
-        });
-
-        // Apply radius once at startup too
-        google.maps.event.addListenerOnce(map, "idle", () => {
-          const zoom = map.getZoom();
-          const lat = map.getCenter().lat();
-          const radiusPixels = metresToPixels(100, lat, zoom);
-
-          Object.values(heatmaps).forEach(h =>
-            h.set("radius", radiusPixels)
-          );
         });
 
         document.getElementById("loading").style.display = "none";
@@ -201,5 +170,3 @@
 
   </body>
 </html>
-
-
