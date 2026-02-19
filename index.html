@@ -85,10 +85,10 @@
               .filter(row => Number(row[issue.key]) >= 2)
               .map(row => ({
                 location: new google.maps.LatLng(row.lat, row.lng),
-                weight: Number(row[issue.key]) * 200
+                weight: Number(row[issue.key]) * 20
               })),
             gradient: softGradient,
-            radius: 80,
+            radius: 60,
             map: null
           });
         });
@@ -170,4 +170,5 @@
 
   </body>
 </html>
+
 
