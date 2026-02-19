@@ -209,7 +209,7 @@
         markers = [];
 
         if (showPoints) {
-          const data = heatmaps[selected].getData();
+          const data = heatmaps[selected].getData().getArray();
           data.forEach(item => {
             const marker = new google.maps.Marker({
               position: item.location,
@@ -225,7 +225,9 @@
       /* ⭐ Corrected stats function */
       function updateStats(issueKey) {
         const panel = document.getElementById("statsPanel");
-        const data = heatmaps[issueKey].getData();
+
+        // Convert MVCArray → normal array
+        const data = heatmaps[issueKey].getData().getArray();
 
         const scores = data.map(p => p.weight / 20);
 
